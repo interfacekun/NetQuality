@@ -239,7 +239,7 @@ stail[link]="${Font_I}Report Link: $Font_U"
 ;;
 "cn")swarn[1]="错误：不支持的参数！"
 swarn[2]="错误：IP地址格式错误！"
-swarn[3]="错误：未安装依赖程序，请以root执行此脚本，或者安装sudo命令！"
+swarn[3]="错误：未安装依赖程序，请以root执行此脚本，或者安装命令！"
 swarn[4]="错误：参数-4与-i/-6冲突！"
 swarn[6]="错误：参数-6与-i/-4冲突！"
 swarn[9]="错误: 不允许跳过所有功能！"
@@ -383,10 +383,10 @@ echo -e "Detected parameter $Font_Green-y$Font_Suffix. Continue installation..."
 fi
 if [[ $is_dep -eq 0 ]];then
 if [ "$(uname)" == "Darwin" ];then
-install_packages "brew" "brew install" "no_sudo"
+install_packages "brew" "brew install" "no_"
 elif [ -f /etc/os-release ];then
 . /etc/os-release
-if [ $(id -u) -ne 0 ]&&! command -v sudo >/dev/null 2>&1;then
+if [ $(id -u) -ne 0 ]&&! command -v  >/dev/null 2>&1;then
 ERRORcode=3
 fi
 case $ID in
@@ -435,37 +435,37 @@ fi
 install_packages(){
 local package_manager=$1
 local install_command=$2
-local no_sudo=$3
-if [ "$no_sudo" == "no_sudo" ]||[ $(id -u) -eq 0 ];then
-local usesudo=""
+local no_=$3
+if [ "$no_" == "no_" ]||[ $(id -u) -eq 0 ];then
+local use=""
 else
-local usesudo="sudo"
+local use=""
 fi
 case $package_manager in
-apt)$usesudo apt update
-$usesudo $install_command jq curl imagemagick mtr iperf3 stun bc procps
+apt)$use apt update
+$use $install_command jq curl imagemagick mtr iperf3 stun bc procps
 ;;
-dnf|yum)$usesudo $install_command epel-release
-$usesudo $package_manager makecache
-$usesudo $install_command jq curl ImageMagick mtr iperf3 stun bc procps-ng
+dnf|yum)$use $install_command epel-release
+$use $package_manager makecache
+$use $install_command jq curl ImageMagick mtr iperf3 stun bc procps-ng
 ;;
-pacman)$usesudo pacman -Sy
-$usesudo $install_command jq curl imagemagick mtr iperf3 stun bc procps-ng
+pacman)$use pacman -Sy
+$use $install_command jq curl imagemagick mtr iperf3 stun bc procps-ng
 ;;
-apk)$usesudo apk update
-$usesudo $install_command jq curl imagemagick mtr iperf3 bc procps
+apk)$use apk update
+$use $install_command jq curl imagemagick mtr iperf3 bc procps
 ;;
-pkg)$usesudo $package_manager update
-$usesudo $package_manager $install_command jq curl imagemagick mtr iperf3 stun bc procps
+pkg)$use $package_manager update
+$use $package_manager $install_command jq curl imagemagick mtr iperf3 stun bc procps
 ;;
 brew)eval "$(/opt/homebrew/bin/brew shellenv)"
 $install_command jq curl imagemagick mtr iperf3 stun bc procps
 ;;
-zypper)$usesudo zypper refresh
-$usesudo $install_command jq curl imagemagick mtr iperf3 stun bc procps
+zypper)$use zypper refresh
+$use $install_command jq curl imagemagick mtr iperf3 stun bc procps
 ;;
-xbps)$usesudo xbps-install -Sy
-$usesudo $install_command jq curl imagemagick mtr iperf3 stun bc procps-ng
+xbps)$use xbps-install -Sy
+$use $install_command jq curl imagemagick mtr iperf3 stun bc procps-ng
 esac
 }
 install_speedtest(){
@@ -474,12 +474,12 @@ brew tap teamookla/speedtest
 brew update
 brew install speedtest --force
 elif [ "$(uname)" == "FreeBSD" ];then
-sudo pkg update&&sudo pkg install -g libidn2 ca_root_nss
+ pkg update&& pkg install -g libidn2 ca_root_nss
 freebsd_version=$(freebsd-version|cut -d '-' -f 1)
 case $freebsd_version in
-12.*)sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd12-x86_64.pkg"
+12.*) pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd12-x86_64.pkg"
 ;;
-13.*)sudo pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd13-x86_64.pkg"
+13.*) pkg add "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-freebsd13-x86_64.pkg"
 ;;
 *)echo "Unsupported FreeBSD version: $freebsd_version"
 exit 1
@@ -494,8 +494,8 @@ case "$sysarch" in
 *)echo "Unsupported architecture"
 exit 1
 esac
-sudo curl -o /usr/bin/speedtest "https://cdn.jsdelivr.net/gh/xykt/NetQuality@main/ref/speedtest/speedtest-$sys_type"
-sudo chmod +x /usr/bin/speedtest
+ #curl -o /usr/bin/speedtest "https://cdn.jsdelivr.net/gh/xykt/NetQuality@main/ref/speedtest/speedtest-$sys_type"
+ chmod +x /usr/bin/speedtest
 fi
 }
 declare -A browsers=(
@@ -2055,7 +2055,7 @@ iperf_test(){
 ibar_step=48
 local ipv=$1
 local port=0
-local json_data=$(curl -s https://raw.githubusercontent.com/xykt/NetQuality/refs/heads/main/ref/iperf.json)
+local json_data=$(cat ref/iperf.json)
 while IFS=" " read -r code server portl portu city cityzh;do
 if [[ $LANG == "cn" ]];then
 icity["$code"]="$cityzh"
@@ -2197,7 +2197,7 @@ echo "$color$(printf '%6s' "$result")$Font_Suffix"
 }
 speedtest_test(){
 ibar_step=36
-local json_data=$(curl -s https://raw.githubusercontent.com/xykt/NetQuality/refs/heads/main/ref/speedtest_cn.json)
+local json_data=$(cat ref/speedtest_cn.json)
 declare -A codemax
 codemax[1]=0
 codemax[2]=0
@@ -2504,14 +2504,14 @@ echo -ne "\r$shelp\n"
 exit 0
 }
 show_ad(){
-asponsor=$(curl -sL --max-time 5 "https://cdn.jsdelivr.net/gh/xykt/IPQuality@main/ref/sponsor.ans")
-aad1=$(curl -sL --max-time 5 "https://cdn.jsdelivr.net/gh/xykt/IPQuality@main/ref/ad1.ans")
+asponsor=$(cat ref/sponsor.ans)
+aad1=$(cat ref/ad1.ans)
 echo -e "$asponsor"
 echo -e "$aad1"
 }
 read_ref(){
-ISO3166=$(curl -sL -m 10 "https://cdn.jsdelivr.net/gh/xykt/NetQuality@main/ref/iso3166.json")
-RESPONSE=$(curl -s https://cdn.jsdelivr.net/gh/xykt/NetQuality@main/ref/province.json)
+ISO3166=$(cat ref/iso3166.json)
+RESPONSE=$(cat ref/province.json)
 while IFS=" " read -r province code short name;do
 pcode[$province]=$code
 pshort[$province]=$short
@@ -2538,7 +2538,7 @@ done
 fi
 while read -r as name;do
 AS_MAPPING["$as"]="$name"
-done < <(curl -s "https://raw.githubusercontent.com/xykt/NetQuality/refs/heads/main/ref/AS_Mapping.txt")
+done < <(cat ref/AS_Mapping.txt)
 }
 save_json(){
 local head_updates=""

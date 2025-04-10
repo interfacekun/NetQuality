@@ -1,3 +1,10 @@
+- use docker
+```bash
+docker run -it --rm --name netq interface/netq:0.0.1
+cd NetQuality
+bash net.sh -R -4
+```
+
 <p align="center">
 <img src="https://hits.xykt.de/net.svg?action=view&count_bg=%2379C83D&title_bg=%23555555&title=Runs&edge_flat=false"/> 
 <img src="https://hits.xykt.de/net_github.svg?action=hit&count_bg=%233DC8C0&title_bg=%23555555&title=Visits&edge_flat=false"/> 
